@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" class="pin-locked">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#170d13" />
+<meta name="description" content="A garden grown for Nabila, my love — happy birthday." />
+<meta property="og:title" content="Nabila — In Full Bloom" />
+<meta property="og:description" content="A garden grown just for you." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="./assets/images/img1.jpeg" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23170d13'/%3E%3Cg transform='translate(50 50)'%3E%3Cellipse cx='0' cy='-22' rx='9' ry='22' fill='%23e88fa3'/%3E%3Cellipse cx='0' cy='-22' rx='9' ry='22' fill='%23e88fa3' transform='rotate(72)'/%3E%3Cellipse cx='0' cy='-22' rx='9' ry='22' fill='%23e88fa3' transform='rotate(144)'/%3E%3Cellipse cx='0' cy='-22' rx='9' ry='22' fill='%23e88fa3' transform='rotate(216)'/%3E%3Cellipse cx='0' cy='-22' rx='9' ry='22' fill='%23e88fa3' transform='rotate(288)'/%3E%3Ccircle r='9' fill='%23d9ab72'/%3E%3C/g%3E%3C/svg%3E" />
+<title>Nabila — In Full Bloom</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+<link rel="stylesheet" href="./css/variables.css" />
+<link rel="stylesheet" href="./css/base.css" />
+<link rel="stylesheet" href="./css/ambient.css" />
+<link rel="stylesheet" href="./css/pin-intro.css" />
+<link rel="stylesheet" href="./css/navigation.css" />
+<link rel="stylesheet" href="./css/hero.css" />
+<link rel="stylesheet" href="./css/sections.css" />
+<link rel="stylesheet" href="./css/responsive.css" />
+</head>
+<body class="pin-locked">
+
+<div class="garden-glow"></div>
+<canvas id="petal-bg"></canvas>
+<canvas id="petal-mid"></canvas>
+<div class="dust-field" id="dustField"></div>
+<canvas id="petal-fg"></canvas>
+<div class="grain"></div>
+<div class="vignette"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+<div class="petal-cursor" id="petalCursor">
+  <svg viewBox="0 0 24 24"><path d="M12 2C7 6 4 10 4 14a8 8 0 0016 0c0-4-3-8-8-12z" fill="#ff9fc0" opacity=".9"/></svg>
+</div>
+
+<!-- PIN GATE — a real numeric input (native OS keyboard, works on every
+     phone) drives a row of decorative digit boxes, same interaction
+     language as the "Model 5" gate. See js/pin-intro.js and
+     css/pin-intro.css. The PIN itself lives in js/config.js
+     (CONFIG.pin.code) — that's the one thing to change per site. -->
+<div class="pin-gate" id="pinGate" role="dialog" aria-modal="true" aria-label="Enter your secret code">
+  <div class="pin-card" id="pinCard">
+    <div class="pin-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+        <path d="M12 3c2.8 0 5 2.4 5 5.4 0 2.6-1.9 4.7-4.3 5.4L12 21l-.7-7.2C9 13.1 7 11 7 8.4 7 5.4 9.2 3 12 3z"/>
+        <circle cx="12" cy="8.2" r="1.6" fill="currentColor" stroke="none"/>
+      </svg>
+    </div>
+    <span class="eyebrow pin-eyebrow">a garden, grown quietly, blooming just for you</span>
+    <h1 class="pin-title">Enter the garden</h1>
+    <p class="pin-hint">Something has been growing just past the gate, only for you.</p>
+
+    <form class="pin-form" id="pinForm" autocomplete="off" novalidate>
+      <div class="pin-digits" id="pinDigits">
+        <input type="text" inputmode="numeric" pattern="[0-9]*" id="pinInput" class="pin-hidden-input" autocomplete="one-time-code" aria-label="Secret code">
+      </div>
+      <button type="submit" class="pin-submit">
+        <span>Unlock it</span>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </form>
+
+    <p class="pin-error" id="pinError" role="alert" aria-live="assertive">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9L2.7 17a2 2 0 001.7 3h15.2a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      That's not quite it — try again.
+    </p>
+  </div>
+</div>
+
+<!-- BLOOM REVEAL — created hidden, switched on by js/pin-intro.js
+     only once the PIN is correct. -->
+<div class="bloom-veil" id="bloomVeil" aria-hidden="true">
+  <div class="bloom-veil-dark" id="bloomVeilDark"></div>
+  <div class="bloom-flowers" id="bloomFlowers"></div>
+  <p class="bloom-text" id="bloomText">For Someone Special…</p>
+</div>
+
+<!-- WATCHDOG — a tiny, dependency-free safety net that runs the instant
+     the parser reaches this point, long before any CDN library or any
+     file in js/ has even started downloading. js/pin-intro.js already
+     has its own internal fail-safe timer once the PIN is accepted,
+     but that timer only starts once pin-intro.js itself actually gets
+     to execute — it can't protect against the case this is really
+     for: a slow/blocked CDN request, a stalled network, or a
+     synchronous error early in the local bundle preventing
+     pin-intro.js from ever running at all. In that scenario the
+     visitor is left staring at just the PIN gate, forever, with no
+     other script around to rescue them. This one has no dependencies
+     at all, so it always runs. It stands down the moment
+     js/pin-intro.js proves it's alive (setting window.__pinIntroStarted),
+     and otherwise force-reveals the page after a generous grace period. -->
+<script>
+(function(){
+  var rescued = false;
+  function rescuePage(){
+    if (rescued) return;
+    rescued = true;
+    try {
+      document.documentElement.classList.remove('pin-locked');
+      document.body.classList.remove('pin-locked');
+      var gate = document.getElementById('pinGate');
+      if (gate && gate.parentNode) gate.parentNode.removeChild(gate);
+      var veil = document.getElementById('bloomVeil');
+      if (veil && veil.parentNode) veil.parentNode.removeChild(veil);
+      var heroContent = document.querySelector('.hero-content');
+      if (heroContent) heroContent.classList.add('reveal');
+      if (window.lenis && typeof window.lenis.start === 'function') window.lenis.start();
+    } catch (e){ /* nothing left to lose at this point — best effort only */ }
+  }
+  window.__rescuePinPage = rescuePage;
+  setTimeout(function(){
+    // If js/pin-intro.js never made it this far, nothing else on the
+    // page is going to save the visitor — do it here instead.
+    if (!window.__pinIntroStarted) rescuePage();
+  }, 7000);
+})();
+</script>
+
+<!-- NAV — a true 3-column CSS Grid (1fr / auto / 1fr), not a flex
+     row. This is the one layout technique that makes "perfectly
+     centered, on every viewport, no hacks" a mathematical guarantee
+     rather than an approximation: the center column sits exactly
+     between two EQUAL flexible tracks by construction, regardless
+     of how wide the logo or the chapter indicator happen to be. No
+     margins, no translateX, no absolute positioning involved.
+
+     On wider screens the menu itself lives directly in this center
+     column as a plain visible bar — nothing to click to reveal it.
+     Below ~900px, seven spelled-out links stop comfortably fitting
+     next to the logo, so `.nav-links` and `.bloom-toggle` share that
+     same center column and swap places purely via CSS — the toggle
+     (which still opens the full poetic chapter list in #gardenIndex)
+     only appears once the always-visible bar no longer fits. -->
+<div class="nav-bar">
+  <a href="#hero" class="mark">Nabila <span>Garden</span></a>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#hero" data-nav>Home</a></li>
+    <li><a href="#gallery" data-nav>Gallery</a></li>
+    <li><a href="#reasons" data-nav>Reasons</a></li>
+    <li><a href="#message" data-nav>Letter</a></li>
+    <li><a href="#playlist" data-nav>Song</a></li>
+    <li><a href="#countdown" data-nav>Countdown</a></li>
+    <li><a href="#finale" data-nav>Bloom</a></li>
+  </ul>
+
+  <button type="button" class="bloom-toggle" id="bloomToggle" aria-label="Open menu" aria-expanded="false" aria-controls="gardenIndex">
+    <svg viewBox="0 0 100 100">
+      <g class="petals">
+        <ellipse class="petal" cx="50" cy="26" rx="9" ry="20"/>
+        <ellipse class="petal" cx="50" cy="26" rx="9" ry="20" transform="rotate(72 50 50)"/>
+        <ellipse class="petal" cx="50" cy="26" rx="9" ry="20" transform="rotate(144 50 50)"/>
+        <ellipse class="petal" cx="50" cy="26" rx="9" ry="20" transform="rotate(216 50 50)"/>
+        <ellipse class="petal" cx="50" cy="26" rx="9" ry="20" transform="rotate(288 50 50)"/>
+      </g>
+      <circle class="core" cx="50" cy="50" r="9"/>
+    </svg>
+  </button>
+
+  <!-- balances the logo on the opposite side with something that
+       actually earns its place — which chapter you're on — rather
+       than an empty spacer that exists purely for symmetry -->
+  <div class="nav-chapter" id="navChapter" aria-hidden="true">
+    <span class="nav-chapter-num" id="navChapterNum">01</span>
+    <span class="nav-chapter-sep">/</span>
+    <span class="nav-chapter-total" id="navChapterTotal">07</span>
+  </div>
+</div>
+
+<nav class="garden-index" id="gardenIndex" aria-hidden="true">
+  <div class="garden-index-inner">
+    <ul class="garden-index-list">
+      <li><a href="#hero" data-nav><span class="num">01</span>Where It Begins</a></li>
+      <li><a href="#gallery" data-nav><span class="num">02</span>Pressed in Time</a></li>
+      <li><a href="#reasons" data-nav><span class="num">03</span>Every Reason Why</a></li>
+      <li><a href="#message" data-nav><span class="num">04</span>What I Never Said</a></li>
+      <li><a href="#playlist" data-nav><span class="num">05</span>Our Song</a></li>
+      <li><a href="#countdown" data-nav><span class="num">06</span>Until Then</a></li>
+      <li><a href="#finale" data-nav><span class="num">07</span>Full Bloom</a></li>
+    </ul>
+    <p class="garden-index-foot">A garden, grown one page at a time — for Nabila</p>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <p class="eyebrow" id="heroEyebrow">A garden, grown quietly for you</p>
+    <h1 class="hero-name">Nabila</h1>
+    <p class="hero-sub">is in full bloom today</p>
+    <p class="hero-line">Somewhere between every ordinary Tuesday and this one, you became the reason my days make sense, beneran. Today, the whole garden turns toward you.</p>
+    <a href="#gallery" class="hero-cta" data-magnetic>
+      <span class="cta-txt">Walk into the garden</span>
+      <span class="cta-line"></span>
+    </a>
+  </div>
+
+  <div class="scroll-cue"><span>scroll</span><span class="stem"></span></div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="section-head">
+    <p class="eyebrow">Specimen collection</p>
+    <h2>Pressed between these pages</h2>
+    <p>Five moments I couldn't bear to let fade, disimpan persis seperti apa adanya.</p>
+    <p class="memory-counter" aria-hidden="true"><span id="memoryCount">0</span> memories, pressed</p>
+  </div>
+
+  <div class="press-field" id="pressField">
+    <figure class="press-card press-1" data-depth="0.4" tabindex="0"><span class="tag">No. 01</span><img src="./assets/images/img1.jpeg" width="1080" height="1920" alt="Nabila — the photo I keep coming back to" loading="lazy" decoding="async"/><figcaption class="cap">this one, I keep coming back to</figcaption></figure>
+    <figure class="press-card press-2" data-depth="0.7" tabindex="0"><span class="tag">No. 02</span><img src="./assets/images/img2.jpeg" width="900" height="1600" alt="Nabila mid-laugh, caught off guard" loading="lazy" decoding="async"/><figcaption class="cap">that laugh, unrehearsed, my favorite sound</figcaption></figure>
+    <figure class="press-card press-3" data-depth="0.5" tabindex="0"><span class="tag">No. 03</span><img src="./assets/images/img3.jpeg" width="1080" height="1920" alt="Nabila in a quiet, everyday moment" loading="lazy" decoding="async"/><figcaption class="cap">a quiet, ordinary miracle</figcaption></figure>
+    <figure class="press-card press-4" data-depth="0.65" tabindex="0"><span class="tag">No. 04</span><img src="./assets/images/img4.jpeg" width="900" height="1600" alt="Nabila, one of my favourite views" loading="lazy" decoding="async"/><figcaption class="cap">still my favourite view, always</figcaption></figure>
+    <figure class="press-card press-5" data-depth="0.45" tabindex="0"><span class="tag">No. 05</span><img src="./assets/images/img5.jpeg" width="900" height="1600" alt="Nabila, exactly as I remember this moment" loading="lazy" decoding="async"/><figcaption class="cap">exactly how I remember it, sampai sekarang</figcaption></figure>
+  </div>
+  <p class="gallery-hint">scroll slowly, pelan-pelan — nothing here is in a hurry</p>
+</section>
+
+<!-- REASONS -->
+<section id="reasons">
+  <div class="section-head">
+    <p class="eyebrow">Field notes</p>
+    <h2>Everything I noticed <em>about you</em></h2>
+    <p>A working list, masih terus bertambah, same as the garden.</p>
+  </div>
+
+  <div class="field-notes">
+    <article class="note n1"><span class="tag">Bloom 01</span><h3>The way you walk in</h3><p>A room rearranges itself around you before you've said a word. I've never worked out how you do it.</p></article>
+    <article class="note n2"><span class="tag">Bloom 02</span><h3>That laugh, specifically</h3><p>Loud, sudden, entirely unfiltered — it's the one sound I'd choose on repeat over anything else I own.</p></article>
+    <article class="note n3"><span class="tag">Bloom 03</span><h3>How gently you treat people</h3><p>You notice the small things — who's quiet, who's tired, who needs the good seat. Nggak ada yang ngajarin kamu itu. You just are it.</p></article>
+    <article class="note n4"><span class="tag">Bloom 04</span><h3>Your particular kind of strength</h3><p>You carry hard weeks like they weigh nothing, then still show up soft for everyone else.</p></article>
+    <article class="note n5"><span class="tag">Bloom 05</span><h3>Home, basically</h3><p>Being near you feels less like a place I visit and more like somewhere I was always meant to end up.</p></article>
+    <article class="note n6"><span class="tag">Bloom 06</span><h3>All of it, really</h3><p>Your voice, your half-finished sentences, the way you think out loud — aku sayang setiap bagian kecil darimu, even the unremarkable ones.</p></article>
+  </div>
+</section>
+
+<!-- MESSAGE -->
+<section id="message">
+  <div class="section-head">
+    <p class="eyebrow">Sealed with a petal</p>
+    <h2>A letter, pressed <em>into this page</em>, for you only</h2>
+  </div>
+
+  <div class="letter-wrap">
+    <div class="letter" lang="en">
+      <p><span class="letter-drop">Y</span>ou are the reason my days feel like they mean something.
+        Every morning I wake up feels a little lighter just knowing you exist —
+        and honestly, sayang, that is the biggest gift I've ever been given.
+      </p>
+      <p>
+        On your birthday, I want you to know that
+        <mark>no single word is enough</mark>
+        to describe how grateful I am to know you, to love you,
+        and to share this world with you.
+      </p>
+      <p>
+        You are beautiful — not only on the outside, but in the way you laugh,
+        the way you care, the way you are simply yourself
+        without ever asking anyone to accept more than you're able to give.
+      </p>
+      <p>
+        I hope this year brings you everything you've been dreaming of.
+        I hope you keep growing, keep shining, and always know
+        that wherever you are — <mark>you will always have a place to come home to.</mark>
+        Selamat ulang tahun, sayang.
+      </p>
+      <div class="letter-sign">
+        <span class="who">With all my love</span>
+        <span class="from">Prince G</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAYLIST -->
+<section id="playlist">
+  <div class="section-head">
+    <p class="eyebrow">Our soundtrack</p>
+    <h2>One song that smells like <em>summer</em></h2>
+    <p>The one track that played while this garden grew, terus terngiang sampai sekarang. Press play and let it stay in the background.</p>
+  </div>
+
+  <div class="player" id="player">
+    <button type="button" class="track-play" id="trackPlayBtn" aria-label="Play our song">
+      <svg viewBox="0 0 16 16" class="ic-play"><path d="M3 1l12 7-12 7z"/></svg>
+      <svg viewBox="0 0 16 16" class="ic-pause"><rect x="2" y="1" width="4" height="14" rx="1"/><rect x="10" y="1" width="4" height="14" rx="1"/></svg>
+    </button>
+    <div class="track-body">
+      <div class="track-meta">
+        <div>
+          <div class="track-title">Beautiful</div>
+          <div class="track-sub">BAZZI</div>
+        </div>
+        <div class="track-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="track-scrub" id="trackScrub" role="slider" aria-label="Seek" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="track-scrub-fill" id="trackScrubFill"></div>
+      </div>
+      <div class="track-time"><span id="trackCurrent">0:00</span><span id="trackDuration">0:00</span></div>
+    </div>
+    <audio id="audioEl" preload="metadata" src="./assets/audio/song1.mp3"></audio>
+  </div>
+</section>
+
+<!-- COUNTDOWN -->
+<section id="countdown">
+  <div class="section-head">
+    <p class="eyebrow">Next bloom</p>
+    <h2>Counting the days <em>till it blooms again</em>, tak sabar rasanya</h2>
+  </div>
+
+  <div class="dial-row" id="dialRow">
+    <div class="dial" data-unit="days"><svg viewBox="0 0 150 150"><circle class="track" cx="75" cy="75" r="68"/><circle class="prog" cx="75" cy="75" r="68"/></svg><span class="val">00</span><span class="lbl">Days</span></div>
+    <div class="dial" data-unit="hours"><svg viewBox="0 0 150 150"><circle class="track" cx="75" cy="75" r="68"/><circle class="prog" cx="75" cy="75" r="68"/></svg><span class="val">00</span><span class="lbl">Hours</span></div>
+    <div class="dial" data-unit="minutes"><svg viewBox="0 0 150 150"><circle class="track" cx="75" cy="75" r="68"/><circle class="prog" cx="75" cy="75" r="68"/></svg><span class="val">00</span><span class="lbl">Minutes</span></div>
+    <div class="dial" data-unit="seconds"><svg viewBox="0 0 150 150"><circle class="track" cx="75" cy="75" r="68"/><circle class="prog" cx="75" cy="75" r="68"/></svg><span class="val">00</span><span class="lbl">Seconds</span></div>
+  </div>
+</section>
+
+<!-- FINALE -->
+<section class="finale" id="finale">
+  <svg class="finale-bloom" viewBox="0 0 100 100" id="finaleBloomSVG">
+    <g transform="translate(50,50)">
+      <ellipse class="fpetal" cx="0" cy="-24" rx="10" ry="24" fill="var(--rose)"/>
+      <ellipse class="fpetal" cx="0" cy="-24" rx="10" ry="24" fill="var(--rose)" transform="rotate(72)"/>
+      <ellipse class="fpetal" cx="0" cy="-24" rx="10" ry="24" fill="var(--rose)" transform="rotate(144)"/>
+      <ellipse class="fpetal" cx="0" cy="-24" rx="10" ry="24" fill="var(--rose)" transform="rotate(216)"/>
+      <ellipse class="fpetal" cx="0" cy="-24" rx="10" ry="24" fill="var(--rose)" transform="rotate(288)"/>
+      <circle r="10" fill="var(--gold)"/>
+    </g>
+  </svg>
+  <p class="eyebrow" style="justify-content:center;">The last page, the first of many</p>
+  <h2>Happy <em>Birthday</em>, sayang</h2>
+  <p class="quote">"You are my today, and all of my tomorrows."</p>
+  <p class="wish">Here's to you — selamanya, and to every year this garden gets a little wilder. 🌹</p>
+  <button type="button" class="finale-btn" id="confettiBtn">Let the petals fall</button>
+</section>
+
+<footer>
+  <div class="mark2">Nabila</div>
+  <p>Grown, page by page, with all my love, selalu — Prince G</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+<script src="./js/config.js"></script>
+<script src="./js/utils.js"></script>
+<script src="./js/petals-engine.js"></script>
+<script src="./js/atmosphere.js"></script>
+<script src="./js/app.js"></script>
+<script src="./js/navigation.js"></script>
+<script src="./js/hero.js"></script>
+<script src="./js/scroll-reveal.js"></script>
+<script src="./js/music-player.js"></script>
+<script src="./js/countdown.js"></script>
+<script src="./js/pin-intro.js"></script>
+</body>
+</html>
