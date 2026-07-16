@@ -96,6 +96,23 @@
   }
 
   /* ---------------- transport ---------------- */
+  // Always starts playback at 00:00. Never seeks anywhere else and never
+  // consults a remembered position — used for every "begin the soundtrack"
+  // path (desktop and mobile alike) so behavior is identical on both.
+  function startFromBeginning(onRejected){
+    function resetAndPlay(){
+      audio.currentTime = 0;
+      play(onRejected);
+    }
+    // readyState >= 1 (HAVE_METADATA) means duration/seekable info is
+    // available, so setting currentTime is safe. Otherwise wait for
+    // loadedmetadata before seeking, instead of seeking too early.
+    if (audio.readyState >= 1){
+      resetAndPlay();
+    } else {
+      audio.addEventListener('loadedmetadata', resetAndPlay, { once: true });
+    }
+  }
   function play(onRejected){
     audio.volume = 0;
     const attempt = audio.play();
@@ -123,7 +140,7 @@
   function pause(explicit){
     fadeTo(0, FADE_MS, () => audio.pause());
     wrap && wrap.classList.remove('playing');
-    if (explicit) writeState({ enabled: false, time: audio.currentTime || 0 });
+    if (explicit) writeState({ enabled: false });
   }
 
   playBtn && playBtn.addEventListener('click', () => {
@@ -153,7 +170,7 @@
     const restoreVol = audio.volume;
     audio.volume = 0;
     const attempt = audio.play();
-    const rewind = () => { audio.pause(); audio.volume = restoreVol; };
+    const rewind = () => { audio.pause(); audio.currentTime = 0; audio.volume = restoreVol; };
     if (attempt && attempt.then){
       attempt.then(rewind).catch(() => { audioUnlocked = false; /* try again on the next gesture */ });
     } else {
@@ -187,20 +204,19 @@
       if (targetIsPlayButton || !audio.paused) return;
       musicRetryArmed = false;
       RETRY_EVENTS.forEach(ev => document.removeEventListener(ev, onRetryGesture, true));
-      play(armMusicRetry); // still rejected? re-arm again for the next gesture
+      startFromBeginning(armMusicRetry); // still rejected? re-arm again for the next gesture
     }
     RETRY_EVENTS.forEach(ev => document.addEventListener(ev, onRetryGesture, { capture:true, passive:true }));
   }
   window.__startBackgroundMusic = function(){
-    if (audio.paused) play(armMusicRetry);
+    if (audio.paused) startFromBeginning(armMusicRetry);
   };
 
-  /* ---------------- restore saved position ---------------- */
+  /* ---------------- duration display ----------------
+     Playback position is intentionally never remembered or restored:
+     the track always starts at 00:00. */
   audio.addEventListener('loadedmetadata', () => {
     durEl && (durEl.textContent = fmt(audio.duration));
-    if (saved && saved.time > 0 && saved.time < audio.duration - 1){
-      audio.currentTime = saved.time;
-    }
   });
   audio.addEventListener('timeupdate', () => {
     if (scrubbing) return;
@@ -211,15 +227,14 @@
   });
   audio.addEventListener('ended', () => {
     wrap && wrap.classList.remove('playing');
-    writeState({ time: 0, enabled: false });
+    writeState({ enabled: false });
   });
   window.addEventListener('beforeunload', () => {
-    writeState({ time: audio.currentTime || 0, enabled: !audio.paused });
+    writeState({ enabled: !audio.paused });
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) writeState({ time: audio.currentTime || 0, enabled: !audio.paused });
+    if (document.hidden) writeState({ enabled: !audio.paused });
   });
-  setInterval(() => { if (!audio.paused) writeState({ time: audio.currentTime || 0 }); }, SAVE_MS);
 
   /* ---------------- scrub bar ---------------- */
   function seekFromEvent(e){
@@ -289,7 +304,7 @@
       const targetIsPlayButton = playBtn && e.target && e.target.closest && e.target.closest('#trackPlayBtn');
       if (targetIsPlayButton || !audio.paused) return;
 
-      play(rearm);
+      startFromBeginning(rearm);
     }
 
     GESTURE_EVENTS.forEach(ev => document.addEventListener(ev, onFirstInteraction, { capture: true, passive: true }));
