@@ -130,6 +130,38 @@
     if (audio.paused) play(); else pause(true);
   });
 
+  /* ---------------- mobile audio unlock ----------------
+     Some mobile engines only count a strict click/touchend/keydown
+     as the "trusted gesture" that's allowed to start audio — not
+     necessarily whatever moment the correct PIN happens to complete
+     (which, when typed rather than submitted via the button, fires
+     on an `input` event). So js/pin-intro.js calls this once, on the
+     visitor's very FIRST tap/keystroke on the PIN screen — long
+     before the PIN is actually correct — to prime the element while
+     it's unambiguously still inside a raw trusted gesture. A play()
+     immediately followed by pause() is the standard mobile-Safari-
+     compatible unlock: once an element has successfully played even
+     a fraction of a second under a trusted gesture, that same element
+     stays unlocked for the rest of the page, so the *real* start call
+     later (right after PIN success) is playing into an already-
+     unlocked element instead of gambling on that exact later moment
+     still counting. */
+  let audioUnlocked = false;
+  function unlockAudio(){
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    const restoreVol = audio.volume;
+    audio.volume = 0;
+    const attempt = audio.play();
+    const rewind = () => { audio.pause(); audio.volume = restoreVol; };
+    if (attempt && attempt.then){
+      attempt.then(rewind).catch(() => { audioUnlocked = false; /* try again on the next gesture */ });
+    } else {
+      rewind();
+    }
+  }
+  window.__unlockAudio = unlockAudio;
+
   /* ---------------- direct start, for js/pin-intro.js ----------------
      When a PIN gate is present (#pinGate in the markup), the global
      first-interaction auto-start below is disabled on purpose — the

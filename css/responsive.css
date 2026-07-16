@@ -6,22 +6,47 @@
 @media (min-width: 1800px){
   :root{ --max-w: 1560px; }
   .hero-content{ max-width:840px; }
-  .press-field{ height:150vh; }
+  .press-field{ height:200vh; }
 }
 
 /* Tablet portrait / small laptop */
 @media (max-width: 1024px){
   .press-card{ width:min(34vw,280px); }
-  .press-card img{ height:280px; }
 }
 
 /* Nav: seven spelled-out links + the logo + the chapter counter stop
-   comfortably fitting on one row below this width — swap the always-
-   visible bar for the toggle + full-screen index instead of letting
-   it wrap or crowd the edges */
+   comfortably fitting on one row below this width. Rather than hiding
+   the menu behind an icon, the bar becomes two rows: logo + chapter
+   counter stay on top, the SAME text links drop to their own row
+   directly beneath as a horizontally-scrollable strip — a proper,
+   readable, always-visible top nav, adapted for mobile, never
+   replaced by a toggle button. */
 @media (max-width: 900px){
-  .nav-links{ display:none; }
-  .bloom-toggle{ display:flex; }
+  :root{ --nav-h: 104px; }
+  .nav-bar{
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    row-gap: 8px;
+    height:auto;
+    padding-top: calc(env(safe-area-inset-top,0px) + 14px);
+    padding-bottom: 12px;
+  }
+  .nav-bar > .mark{ grid-column:1; grid-row:1; }
+  .nav-bar > .nav-chapter{ grid-column:2; grid-row:1; }
+  .nav-bar > .nav-links{
+    grid-column: 1 / -1; grid-row:2;
+    justify-self:stretch; width:100%;
+    justify-content:flex-start;
+    overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+    gap:20px; padding-bottom:2px;
+    /* soft fade at both edges hints there's more to scroll, without
+       a hard clip that reads as content being cut off */
+    mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 24px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 24px), transparent 100%);
+  }
+  .nav-links::-webkit-scrollbar{ display:none; }
+  .nav-links a{ padding:6px 1px; } /* bigger tap target, same look */
+  .bloom-toggle{ display:none !important; }
 }
 
 /* Tablet / large phone landscape */
@@ -35,7 +60,6 @@
   .mark span{ display:none; }
   .nav-chapter{ font-size:.6rem; gap:4px; }
 
-  .hero{ padding-top:110px; align-items:flex-start; }
   .hero-content{ z-index:2; }
   .scroll-cue{ position:static; margin-top:40px; max-width:100%; }
   .scroll-cue{ writing-mode:horizontal-tb; gap:10px; }
@@ -54,7 +78,7 @@
   }
   .press-card:nth-child(even){ transform:rotate(2deg); }
   .press-card:nth-child(odd){ transform:rotate(-2deg); }
-  .press-card img{ height:60vw; max-height:340px; }
+
 
   .note{ max-width:none; }
   .letter{ padding: 40px 4px; }

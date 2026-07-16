@@ -33,7 +33,7 @@ section{ position:relative; z-index:1; padding: var(--pad-y) var(--pad-x); }
    Desktop/tablet: absolute overlap. Mobile: horizontal snap strip
    (absolute overlap layouts break down under 700px — this avoids it).
 ============================================================ */
-.press-field{ position:relative; height: 175vh; margin-top:clamp(24px,4vh,48px); }
+.press-field{ position:relative; height: 235vh; margin-top:clamp(24px,4vh,48px); }
 .press-card{
   position:absolute; width: min(28vw, 320px); border-radius:3px;
   background: var(--ivory); padding: 14px 14px 44px;
@@ -41,7 +41,7 @@ section{ position:relative; z-index:1; padding: var(--pad-y) var(--pad-x); }
   transition: transform .5s var(--ease-lux), box-shadow .5s;
   will-change: transform;
 }
-.press-card img{ width:100%; height:320px; object-fit:cover; filter:saturate(.92) contrast(1.02); border-radius:1px; }
+.press-card img{ width:100%; height:auto; aspect-ratio: 3 / 4; object-fit:cover; filter:saturate(.92) contrast(1.02); border-radius:1px; }
 .press-card:hover{ box-shadow:0 40px 80px -20px rgba(0,0,0,.65), 0 4px 14px rgba(0,0,0,.3); }
 .press-card:focus-visible{ outline:2px solid var(--rose-bright); outline-offset:4px; box-shadow:0 40px 80px -20px rgba(0,0,0,.65); }
 .press-card .cap{
@@ -247,7 +247,7 @@ section{ position:relative; z-index:1; padding: var(--pad-y) var(--pad-x); }
 /* ============================================================
    FOOTER
 ============================================================ */
-footer{ padding: clamp(48px,8vh,80px) var(--pad-x) clamp(36px,6vh,60px); text-align:center; border-top:1px solid rgba(247,236,227,.08); position:relative; z-index:1; }
+footer{ padding: clamp(48px,8vh,80px) var(--pad-x) calc(clamp(36px,6vh,60px) + env(safe-area-inset-bottom, 0px)); text-align:center; border-top:1px solid rgba(247,236,227,.08); position:relative; z-index:1; }
 footer .mark2{ font-family:var(--script); font-style:italic; font-size:1.35rem; color:var(--ivory); }
 footer p{ margin-top:10px; font-size:.76rem; letter-spacing:.06em; color:var(--ivory-dim); opacity:.7; }
 

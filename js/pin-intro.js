@@ -156,6 +156,16 @@
     }
   });
 
+  // First interaction anywhere on the gate — typing or tapping — is
+  // the audio unlock event. `once:true` on each so this never fires
+  // more than it needs to; unlockAudio() itself is also idempotent.
+  function unlockAudioOnce(){
+    try { if (typeof window.__unlockAudio === 'function') window.__unlockAudio(); } catch (e){ /* non-fatal */ }
+  }
+  gate.addEventListener('pointerdown', unlockAudioOnce, { capture:true, passive:true, once:true });
+  gate.addEventListener('touchstart', unlockAudioOnce, { capture:true, passive:true, once:true });
+  input.addEventListener('keydown', unlockAudioOnce, { capture:true, passive:true, once:true });
+
   function attemptUnlock(){
     if (finished) return;
     const val = input.value.replace(/\D/g, '');

@@ -45,6 +45,15 @@ function makePicker(){
   };
 }
 
+/* On narrow phone screens the readable content spans nearly the full
+   width, so a flower placed anywhere is placed on top of it. Biasing
+   the busier layers toward the outer edges keeps them decorating the
+   page rather than drifting straight across whatever's being read. */
+function edgeBiasedX(W, biased){
+  if (!biased) return rand(0, W);
+  return Math.random() < 0.62 ? rand(0, W*0.30) : rand(W*0.70, W);
+}
+
 /* ---- device tier: conservative up front, then adapts live from
    measured frame time (see Engine.tick below) ---- */
 let tierName = (() => {
@@ -182,14 +191,15 @@ class Layer {
   ambientSpawn(anywhere){
     const p = this.pool.find(p=>!p.active);
     if (!p) return;
+    const narrow = engine.narrow;
     p.spawn({
-      x: rand(0,this.W),
+      x: edgeBiasedX(this.W, this.conf.bias && narrow),
       y: anywhere ? rand(0,this.H) : -60,
       vx: rand(-0.3,0.3),
       vy: rand(0.3,0.9) * this.conf.speed,
       gravity: 0.04 * this.conf.speed,
       drag: 0.992,
-      scale: rand(this.conf.scaleMin, this.conf.scaleMax),
+      scale: rand(this.conf.scaleMin, this.conf.scaleMax) * (engine.sizeScale ?? 1),
       opacity: rand(this.conf.opMin, this.conf.opMax),
       spin: 0.02,
       recycle: true,
@@ -255,11 +265,18 @@ const engine = {
     const fgC  = document.getElementById('petal-fg');
 
     this.layers.bg  = new Layer(bgC,  { dpr:2, speed:0.6, scaleMin:0.3, scaleMax:0.55, opMin:0.18, opMax:0.35 });
-    this.layers.mid = new Layer(midC, { dpr:2, speed:1,   scaleMin:0.55,scaleMax:0.95, opMin:0.35, opMax:0.6  });
-    this.layers.fg  = new Layer(fgC,  { dpr:2, speed:1.5, scaleMin:0.9, scaleMax:1.4,  opMin:0.55, opMax:0.85 });
+    this.layers.mid = new Layer(midC, { dpr:2, speed:1,   scaleMin:0.55,scaleMax:0.95, opMin:0.35, opMax:0.6,  bias:true });
+    this.layers.fg  = new Layer(fgC,  { dpr:2, speed:1.5, scaleMin:0.9, scaleMax:1.4,  opMin:0.55, opMax:0.85, bias:true });
 
     const updateDensity = () => {
       this.densityScale = clamp((innerWidth*innerHeight)/(1440*900), 0.55, 1.65);
+      // The sprite is drawn at a fixed CSS-pixel size — right at 1440px
+      // wide, oversized on a 380–430px phone where the same px count
+      // eats a much bigger share of the screen. Scale it down together
+      // with viewport width so flowers read as background decoration
+      // at every breakpoint, not just on wide screens.
+      this.sizeScale = clamp(innerWidth/1440, 0.72, 1);
+      this.narrow = innerWidth <= 700;
     };
     updateDensity();
     this.applyTier(tierName, true);

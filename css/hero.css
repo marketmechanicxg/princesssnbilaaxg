@@ -2,12 +2,14 @@
    HERO — the thesis: a single bloom opening over her name
 ============================================================ */
 .hero{
-  position:relative; min-height:100svh; display:flex; align-items:center; justify-content:center;
+  position:relative; min-height:100svh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
   /* padding-top == nav height, not a rough vh guess — this is the
      exact offset that makes the content's optical center land in the
      middle of the space actually visible below the fixed nav, instead
      of the true geometric center of the full (nav-covered) viewport */
-  padding: calc(var(--nav-h) + env(safe-area-inset-top, 0px)) var(--pad-x) 0; overflow:hidden;
+  padding: calc(var(--nav-h) + env(safe-area-inset-top, 0px)) max(var(--pad-x), env(safe-area-inset-left, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(var(--pad-x), env(safe-area-inset-right, 0px));
+  overflow:hidden;
   text-align:center;
 }
 .hero-content{

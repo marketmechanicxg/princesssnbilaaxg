@@ -6,6 +6,10 @@
 html{ scroll-behavior:auto; }
 html, body{ width:100%; overflow-x:hidden; }
 body{
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+body{
   background: var(--bg-deep);
   color: var(--ivory);
   font-family: var(--body);
